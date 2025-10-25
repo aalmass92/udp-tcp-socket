@@ -1,5 +1,29 @@
 import socket
 import threading
+import subprocess
+import platform
+
+def get_available_interfaces():
+    """Get available IPv4 network interfaces - short version"""
+    interfaces = [("Localhost", "127.0.0.1", "Local only"), ("All interfaces", "0.0.0.0", "Any IP")]
+    
+    try:
+        # Auto-detect OS and run appropriate command
+        cmd = ['ipconfig'] if platform.system() == 'Windows' else ['ifconfig']
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        # Parse output for IP addresses
+        for line in result.stdout.split('\n'):
+            if 'IPv4 Address' in line or 'inet ' in line:
+                # Extract IP from Windows or Unix format
+                ip = line.split(':')[1].strip().split()[0].strip('()') if ':' in line else line.split()[1].split('/')[0]
+                if ip and not ip.startswith('127.') and ip not in [i[1] for i in interfaces]:
+                    interfaces.append((f"Network {ip}", ip, "Detected"))
+    except:
+        # No fallback - if system commands fail, just use localhost and all interfaces
+        pass
+    
+    return interfaces
 
 class NetworkServer:
     def __init__(self, host='localhost', port=8080):
@@ -44,21 +68,34 @@ class NetworkServer:
             udp_socket.sendto(f"Echo: {data.decode('utf-8')}".encode('utf-8'), addr)
 
 def main():
-    print("Choose host interface:")
-    print("1. Localhost (127.0.0.1) - Local connections only")
-    print("2. All interfaces (0.0.0.0) - Accept connections from any IP")
+    # Get available interfaces
+    interfaces = get_available_interfaces()
     
-    host_choice = input("Enter choice (1 or 2): ")
+    print("Available network interfaces:")
+    print("-" * 50)
     
-    if host_choice == '1':
-        host = 'localhost'
-        print("Selected: Localhost - Server will only accept local connections")
-    elif host_choice == '2':
-        host = '0.0.0.0'
-        print("Selected: All interfaces - Server will accept connections from any IP")
-    else:
-        print("Invalid choice, defaulting to localhost")
-        host = 'localhost'
+    for i, (name, ip, description) in enumerate(interfaces, 1):
+        print(f"{i}. {name}")
+        print(f"   IP: {ip}")
+        print(f"   Description: {description}")
+        print()
+    
+    while True:
+        try:
+            choice = int(input(f"Enter choice (1-{len(interfaces)}): "))
+            if 1 <= choice <= len(interfaces):
+                selected_interface = interfaces[choice - 1]
+                host = selected_interface[1]
+                print(f"\nSelected: {selected_interface[0]} ({host})")
+                print(f"Description: {selected_interface[2]}")
+                break
+            else:
+                print(f"Invalid choice. Please enter a number between 1 and {len(interfaces)}")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            return
     
     server = NetworkServer(host=host)
     

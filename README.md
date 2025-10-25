@@ -16,7 +16,9 @@ data communication/
 ### Server Features:
 - **TCP Server**: Connection-oriented, reliable communication
 - **UDP Server**: Connectionless, fast communication
-- **Host Selection**: Choose between localhost or all interfaces
+- **Automatic Interface Detection**: Automatically discovers available network interfaces
+- **Cross-Platform**: Works on Windows (ipconfig), Linux/Mac (ifconfig)
+- **Smart Interface Selection**: Choose from detected WiFi, Ethernet, VPN interfaces
 - **Echo Functionality**: Responds with "Echo: [your message]"
 - **Multithreaded**: Handles multiple TCP clients simultaneously
 
@@ -47,12 +49,27 @@ data communication/
    python Server.py
    ```
 
-2. **Choose host interface:**
+2. **Choose network interface:**
    ```
-   Choose host interface:
-   1. Localhost (127.0.0.1) - Local connections only
-   2. All interfaces (0.0.0.0) - Accept connections from any IP
-   Enter choice (1 or 2): 1
+   Available network interfaces:
+   --------------------------------------------------
+   1. Localhost
+      IP: 127.0.0.1
+      Description: Local only
+
+   2. All interfaces
+      IP: 0.0.0.0
+      Description: Any IP
+
+   3. Network 192.168.1.100
+      IP: 192.168.1.100
+      Description: Detected
+
+   4. Network 192.168.0.50
+      IP: 192.168.0.50
+      Description: Detected
+
+   Enter choice (1-4): 3
    ```
 
 3. **Select server type:**
@@ -65,7 +82,7 @@ data communication/
 
 4. **Server will start and display:**
    ```
-   TCP Server listening on localhost:8080
+   TCP Server listening on 192.168.1.100:8080
    ```
 
 ### Running the Client
@@ -122,8 +139,22 @@ data communication/
 - **UDP Server**: 8081
 
 ### Host Options:
-- **Localhost**: `127.0.0.1` or `localhost` - Local connections only
+- **Localhost**: `127.0.0.1` - Local connections only
 - **All Interfaces**: `0.0.0.0` - Accept connections from any IP address
+- **Auto-Detected Interfaces**: Automatically discovered network adapters (WiFi, Ethernet, VPN, etc.)
+
+## 📊 Interface Detection
+
+The server automatically detects available network interfaces using system commands:
+- **Windows**: Uses `ipconfig` to find IPv4 addresses
+- **Linux/Mac**: Uses `ifconfig` to discover network interfaces
+- **Fallback**: Uses hostname resolution if system commands fail
+
+### Supported Interface Types:
+- **WiFi Adapters**: Wireless network connections
+- **Ethernet**: Wired network connections  
+- **VPN Connections**: Virtual private network interfaces
+- **Virtual Adapters**: Docker, VMware, VirtualBox networks
 
 
 
@@ -132,12 +163,28 @@ data communication/
 ### TCP Communication:
 ```
 Server Output:
-TCP Server listening on localhost:8080
-TCP connection from ('127.0.0.1', 54321)
+Available network interfaces:
+--------------------------------------------------
+1. Localhost
+   IP: 127.0.0.1
+   Description: Local only
+
+2. All interfaces
+   IP: 0.0.0.0
+   Description: Any IP
+
+3. Network 192.168.1.100
+   IP: 192.168.1.100
+   Description: Detected
+
+Selected: Network 192.168.1.100 (192.168.1.100)
+
+TCP Server listening on 192.168.1.100:8080
+TCP connection from ('192.168.1.50', 54321)
 TCP received: Hello from TCP client!
 
 Client Output:
-Connecting to TCP server at localhost:8080
+Connecting to TCP server at 192.168.1.100:8080
 Sending message: 'Hello from TCP client!'
 TCP Server response: Echo: Hello from TCP client!
 ```
@@ -157,6 +204,7 @@ UDP Server response: Echo: Hello from UDP client!
 ## 🔍 Code Structure
 
 ### Server.py
+- `get_available_interfaces()`: Cross-platform network interface detection
 - `NetworkServer` class with TCP and UDP server methods
 - `start_tcp_server()`: Handles TCP connections with threading
 - `start_udp_server()`: Handles UDP packets
