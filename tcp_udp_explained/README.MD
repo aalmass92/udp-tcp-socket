@@ -1,10 +1,10 @@
-#Explanation of Message Flow
+# Explanation of Message Flow
 
 ![UDP Capture](UDPheaders.png)
 
 This is a capture of UDP message flow on the client end.  
 
-!UDP Header
+![UPD Header](UDPheader.png)
 
 As shown, the packet includes UDP headers along with lower-layer protocol headers. 
 
