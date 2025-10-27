@@ -1,8 +1,10 @@
 # Explanation of Message Flow
 
-![UDP Capture](UDPheaders.png)
+## UDP
 
-This is a capture of UDP message flow on the client end.  
+![UDP Capture](UDP.png)
+
+This is a capture of UDP message flow, captured on the client end.  
 
 ![UPD Header](UDPheader.png)
 
@@ -17,8 +19,22 @@ The Ethernet header, part of Layer 2 (Data Link Layer), contains the source and 
 ![IPv4 Header ](IPv4header.png)
  The IPv4 header, belonging to Layer 3 (Network Layer), is responsible for routing the packet across different networks. 
  
- ![UDP Header ](udpheader.png)
+ ![UDP Header ](UDPheader.png)
  Finally, the UDP header, located at Layer 4 (Transport Layer), facilitates connectionless communication between applications.
+
+## TCP
+![TCP](tcp.png)
+
+### TCP Teliability Mechanisms 
+
+TCP provides reliable communication by ensuring that all data packets are delivered, acknowledged, and reassembled in the correct order. It uses sequence and acknowledgment numbers to track data and retransmit lost packets. For flow control, TCP dynamically adjusts the data transmission rate using the window size field to prevent overwhelming the receiver.
+
+
+
+
+
+
+
 
 ## 📡 Message Flow Breakdown
 

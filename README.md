@@ -5,10 +5,18 @@ A Python-based network communication system that implements both TCP and UDP pro
 ## 📁 Project Structure
 
 ```
-data communication/
-├── Server.py          # TCP/UDP Server implementation
-├── client.py          # TCP/UDP Client implementation
-└── README.md          # This documentation
+Project1/
+├── Server.py              # TCP/UDP Server implementation
+├── client.py              # TCP/UDP Client implementation
+├── README.md              # Main project documentation
+└── tcp_udp_explained/     # Technical documentation folder
+    ├── README.MD          # Detailed protocol explanations
+    ├── ETHheader.png      # Ethernet header diagram
+    ├── IPv4header.png     # IPv4 header diagram
+    ├── tcp.png            # TCP capture screenshot
+    ├── UDP.png            # UDP capture screenshot
+    ├── UDPheader.png      # UDP header diagram
+    └── UDPheaders.png     # Additional UDP header diagram
 ```
 
 ## 🚀 Features
@@ -17,8 +25,6 @@ data communication/
 - **TCP Server**: Connection-oriented, reliable communication
 - **UDP Server**: Connectionless, fast communication
 - **Automatic Interface Detection**: Automatically discovers available network interfaces
-- **Cross-Platform**: Works on Windows (ipconfig), Linux/Mac (ifconfig)
-- **Smart Interface Selection**: Choose from detected WiFi, Ethernet, VPN interfaces
 - **Echo Functionality**: Responds with "Echo: [your message]"
 - **Multithreaded**: Handles multiple TCP clients simultaneously
 
@@ -61,12 +67,12 @@ data communication/
       IP: 0.0.0.0
       Description: Any IP
 
-   3. Network 192.168.1.100
-      IP: 192.168.1.100
+   3. Network 192.168.x.xxx
+      IP: 192.16.x.xx
       Description: Detected
 
-   4. Network 192.168.0.50
-      IP: 192.168.0.50
+   4. Network 192.168.x.xx
+      IP: 192.16.x.xx
       Description: Detected
 
    Enter choice (1-4): 3
@@ -141,20 +147,13 @@ data communication/
 ### Host Options:
 - **Localhost**: `127.0.0.1` - Local connections only
 - **All Interfaces**: `0.0.0.0` - Accept connections from any IP address
-- **Auto-Detected Interfaces**: Automatically discovered network adapters (WiFi, Ethernet, VPN, etc.)
+- **Auto-Detected Interfaces**: Automatically discovered network  interface 
 
 ## 📊 Interface Detection
 
 The server automatically detects available network interfaces using system commands:
 - **Windows**: Uses `ipconfig` to find IPv4 addresses
 - **Linux/Mac**: Uses `ifconfig` to discover network interfaces
-- **Fallback**: Uses hostname resolution if system commands fail
-
-### Supported Interface Types:
-- **WiFi Adapters**: Wireless network connections
-- **Ethernet**: Wired network connections  
-- **VPN Connections**: Virtual private network interfaces
-- **Virtual Adapters**: Docker, VMware, VirtualBox networks
 
 
 
@@ -255,12 +254,6 @@ This project demonstrates:
 
 ## 🤝Roadmap
 
-Feel free to enhance this project by:
 - Adding more protocols (WebSocket, HTTP)
 - Adding encryption/security features (TLS)
 - Creating a GUI interface
-- Adding logging and monitoring
-
-## 📄 License
-
-This project is for educational purposes. Use and modify as needed for learning socket programming concepts.
