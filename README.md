@@ -6,8 +6,11 @@ A Python-based network communication system that implements both TCP and UDP pro
 
 ```
 Project1/
-├── Server.py              # TCP/UDP Server implementation
-├── client.py              # TCP/UDP Client implementation
+├── Server.py              # TCP/UDP/TLS Server implementation
+├── client.py              # TCP/UDP/TLS Client implementation
+├── generate_cert.py       # Certificate generation script
+├── server.crt             # SSL certificate (generated)
+├── server.key             # Private key (generated)
 ├── README.md              # Main project documentation
 └── tcp_udp_explained/     # Technical documentation folder
     ├── README.MD          # Detailed protocol explanations
@@ -24,16 +27,17 @@ Project1/
 ### Server Features:
 - **TCP Server**: Connection-oriented, reliable communication
 - **UDP Server**: Connectionless, fast communication
-- **Automatic Interface Detection**: Automatically discovers available network interfaces
+- **TLS Server**: Encrypted TCP communication with SSL certificates
+- **Automatic Interface Detection**: Discovers available network interfaces
 - **Echo Functionality**: Responds with "Echo: [your message]"
-- **Multithreaded**: Handles multiple TCP clients simultaneously
+- **Multithreaded**: Handles multiple clients at once
 
 ### Client Features:
-- **Protocol Choice**: Select between TCP or UDP
-- **Server Location**: Connect to localhost or remote IP
-- **Port Configuration**: Use default or custom ports
-- **Message Options**: Send default or custom messages
-- **Real-time Feedback**: See connection status and responses
+- **Protocol Choice**: TCP, UDP, or TLS
+- **Server Location**: Localhost or remote IP
+- **Port Configuration**: Default or custom ports
+- **Message Options**: Default or custom messages
+- **Connection Feedback**: Shows status and responses
 
 ## 📋 Requirements
 
@@ -83,13 +87,30 @@ Project1/
    Choose server type:
    1. TCP Server
    2. UDP Server
-   Enter choice (1 or 2): 1
+   3. TLS Server
+   Enter choice (1, 2, or 3): 1
    ```
 
-4. **Server will start and display:**
+4. **Server will start:**
    ```
    TCP Server listening on 192.168.1.100:8080
    ```
+
+### Setting up TLS Server
+
+**First time only - generate certificates:**
+```bash
+python generate_cert.py
+```
+You'll be asked for certificate info (or just press Enter for defaults).
+
+**Then start TLS server:**
+```bash
+python Server.py
+# Choose interface
+# Select option 3 (TLS Server)
+# Enter port (default is 8443)
+```
 
 ### Running the Client
 
@@ -103,7 +124,8 @@ Project1/
    Choose client type:
    1. TCP Client
    2. UDP Client
-   Enter choice (1 or 2): 1
+   3. TLS Client
+   Enter choice (1, 2, or 3): 1
    ```
 
 3. **Select server location:**
@@ -143,6 +165,7 @@ Project1/
 ### Default Ports:
 - **TCP Server**: 8080
 - **UDP Server**: 8081
+- **TLS Server**: 8443
 
 ### Host Options:
 - **Localhost**: `127.0.0.1` - Local connections only
@@ -203,17 +226,23 @@ UDP Server response: Echo: Hello from UDP client!
 ## 🔍 Code Structure
 
 ### Server.py
-- `get_available_interfaces()`: Cross-platform network interface detection
-- `NetworkServer` class with TCP and UDP server methods
-- `start_tcp_server()`: Handles TCP connections with threading
+- `get_available_interfaces()`: Finds network interfaces
+- `NetworkServer` class with TCP, UDP, and TLS support
+- `start_tcp_server()`: Handles TCP/TLS with threading
 - `start_udp_server()`: Handles UDP packets
-- `handle_tcp_client()`: Processes individual TCP client connections
+- `handle_tcp_client()`: Processes client connections
 
 ### client.py
-- `NetworkClient` class with configurable connection options
-- `tcp_client()`: Establishes TCP connection and sends messages
-- `udp_client()`: Sends UDP packets and receives responses
-- Interactive menu system for user configuration
+- `NetworkClient` class with protocol options
+- `tcp_client()`: TCP connections
+- `udp_client()`: UDP packets
+- `tls_client()`: Encrypted TLS connections
+- Menu system for configuration
+
+### generate_cert.py
+- Creates self-signed SSL certificates
+- Uses OpenSSL commands via subprocess
+- Prompts for certificate details
 
 ## 🚦 Testing
 
@@ -246,14 +275,37 @@ UDP Server response: Echo: Hello from UDP client!
    - Check firewall settings on both machines
    - Verify IP address is correct
 
-## 📚 Learning Objectives
+## � TLS/SSL Implementation
 
-This project demonstrates:
+This project includes secure communication using TLS:
+
+### Certificate Generation
+Run `generate_cert.py` to create self-signed certificates. The script uses OpenSSL commands:
+1. Generates 2048-bit RSA private key
+2. Creates certificate signing request (CSR)
+3. Self-signs the certificate (valid 365 days)
+
+### Files Created
+- `server.crt` - SSL certificate
+- `server.key` - Private key
+
+**Note:** Client doesn't need these files. Only the server needs them.
+
+### Testing TLS
+You can compare encrypted vs unencrypted traffic using Wireshark:
+- **TCP (port 8080)**: Message visible in plaintext
+- **TLS (port 8443)**: Message encrypted, only handshake visible
+
+## 📚 What I Learned
+
 - Socket programming in Python
-- Deep dive on how TCP vs UDP protocol works
+- Difference between TCP and UDP
+- How TLS encryption works
+- Certificate generation with OpenSSL
+- Multithreaded server handling
 
-## 🤝Roadmap
+## 🤝 Roadmap
 
-- Adding more protocols (WebSocket, HTTP)
-- Adding encryption/security features (TLS)
-- Creating a GUI interface
+- ~~Adding encryption/security (TLS)~~ ✅ Done
+- WebSocket support
+- GUI interface
