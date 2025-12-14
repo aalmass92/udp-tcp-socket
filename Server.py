@@ -2,6 +2,8 @@ import socket
 import threading
 import subprocess
 import platform
+import ssl
+import os
 
 def get_available_interfaces():
     """Get available IPv4 network interfaces - short version"""
@@ -26,20 +28,39 @@ def get_available_interfaces():
     return interfaces
 
 class NetworkServer:
-    def __init__(self, host='localhost', port=8080):
+    def __init__(self, host='localhost', port=8080, use_tls=False):
         self.host = host
         self.port = port
+        self.use_tls = use_tls
         
     def start_tcp_server(self):
         """Start TCP server"""
         tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         tcp_socket.bind((self.host, self.port))
         tcp_socket.listen(5)
-        print(f"TCP Server listening on {self.host}:{self.port}")
+        
+        if self.use_tls:
+            context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            context.load_cert_chain(certfile='server.crt', keyfile='server.key')
+            print(f"TLS Server listening on {self.host}:{self.port}")
+        else:
+            print(f"TCP Server listening on {self.host}:{self.port}")
         
         while True:
             client_socket, addr = tcp_socket.accept()
-            print(f"TCP connection from {addr}")
+            
+            if self.use_tls:
+                try:
+                    client_socket = context.wrap_socket(client_socket, server_side=True)
+                    print(f"TLS connection from {addr}")
+                except ssl.SSLError as e:
+                    print(f"SSL error: {e}")
+                    client_socket.close()
+                    continue
+            else:
+                print(f"TCP connection from {addr}")
+            
             threading.Thread(target=self.handle_tcp_client, args=(client_socket,)).start()
     
     def handle_tcp_client(self, client_socket):
@@ -97,18 +118,30 @@ def main():
             print("\nExiting...")
             return
     
-    server = NetworkServer(host=host)
-    
     print("\nChoose server type:")
     print("1. TCP Server")
     print("2. UDP Server")
+    print("3. TLS Server")
     
-    choice = input("Enter choice (1 or 2): ")
+    choice = input("Enter choice (1, 2, or 3): ")
     
     if choice == '1':
+        server = NetworkServer(host=host)
         server.start_tcp_server()
     elif choice == '2':
+        server = NetworkServer(host=host)
         server.start_udp_server()
+    elif choice == '3':
+        if not (os.path.exists('server.crt') and os.path.exists('server.key')):
+            print("\nError: Certificate files not found")
+            print("Run: python generate_cert.py")
+            return
+        
+        port = input("TLS port [8443]: ").strip()
+        port = int(port) if port else 8443
+        
+        server = NetworkServer(host=host, port=port, use_tls=True)
+        server.start_tcp_server()
     else:
         print("Invalid choice")
 

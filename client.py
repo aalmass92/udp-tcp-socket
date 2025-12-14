@@ -1,11 +1,13 @@
 import socket
+import ssl
 
 # Client code for TCP and UDP communication
 class NetworkClient:
     # User input or default port variables
-    def __init__(self, tcp_port=8080, udp_port=8081):
+    def __init__(self, tcp_port=8080, udp_port=8081, tls_port=8443):
         self.tcp_port = tcp_port
         self.udp_port = udp_port
+        self.tls_port = tls_port
         
         # Get server host and port from user
     def get_server_host(self):
@@ -28,7 +30,10 @@ class NetworkClient:
     # Get server port from user choice
     def get_server_port(self, protocol):
         """Get server port from user choice"""
-        default_port = self.tcp_port if protocol == 'TCP' else self.udp_port
+        if protocol == 'TLS':
+            default_port = self.tls_port
+        else:
+            default_port = self.tcp_port if protocol == 'TCP' else self.udp_port
         
         print(f"\nChoose {protocol} port:")
         print(f"1. Default port ({default_port})")
@@ -113,14 +118,49 @@ class NetworkClient:
             print(f"UDP Error: {e}")
         finally:
             client_socket.close()
+    
+    def tls_client(self, server_host, server_port, message):
+        """TLS client connection"""
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        try:
+            # Create SSL context
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+            
+            print(f"Connecting to TLS server at {server_host}:{server_port}")
+            
+            # Wrap socket with TLS
+            secure_socket = context.wrap_socket(client_socket, server_hostname=server_host)
+            secure_socket.connect((server_host, server_port))
+            
+            print("Connected (encrypted)")
+            
+            # Send data
+            print(f"Sending message: '{message}'")
+            secure_socket.send(message.encode('utf-8'))
+            
+            # Receive response
+            response = secure_socket.recv(1024)
+            print(f"TLS Server response: {response.decode('utf-8')}")
+            
+        except Exception as e:
+            print(f"TLS Error: {e}")
+        finally:
+            try:
+                secure_socket.close()
+            except:
+                pass
     #
     def start_client(self):
         """Main client interface"""
         print("Choose client type:")
         print("1. TCP Client")
         print("2. UDP Client")
+        print("3. TLS Client")
         
-        choice = input("Enter choice (1 or 2): ")
+        choice = input("Enter choice (1, 2, or 3): ")
         
         # Get server host
         server_host = self.get_server_host()
@@ -133,6 +173,10 @@ class NetworkClient:
             server_port = self.get_server_port('UDP')
             message = self.get_message('UDP')
             self.udp_client(server_host, server_port, message)
+        elif choice == '3':
+            server_port = self.get_server_port('TLS')
+            message = self.get_message('TLS')
+            self.tls_client(server_host, server_port, message)
         else:
             print("Invalid choice")
 
